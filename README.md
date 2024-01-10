@@ -1,7 +1,7 @@
 # lammps-python-interface
 
 LAMMPS pair style that allows to interface with Python, in order to use ML potentials for forces calculations.
-The interface is agnostic with respect to the specific Python framework utilized to create the ML model, because the model loading, initialization, and data formatting is handled by separate python functions, contained in a file specified within the LAMMPS input script.
+The interface is agnostic with respect to the specific Python framework utilized to create the ML model: the model loading, initialization, and data formatting is handled by separate python functions, contained in a file specified within the LAMMPS input script.
 
 The interface makes use of: (1) the `pair_style mlppi` (machine-learned potential python interface) (2) the `python` command and (3) python `variables`. 
 
