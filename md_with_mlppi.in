@@ -1,0 +1,68 @@
+####################################################################
+#
+#  LAMMPS input script for MD using a trained Python ML potential 
+#  The interface with the python NN potential makes use of: (1) the 
+#  pair_style "mlppi" (machine-learned potential python interface)
+#  (2) the "python" command and (3) python variables.
+#  
+#  The python command allows interfacing LAMMPS with an embedded  
+#  Python interpreter and registering a Python function for 
+#  future execution. The Python function is assigned to a python-style  
+#  variable definedin the input script. Whenever the variable is 
+#  evaluated, it will execute the Python function to assign a value 
+#  to the variable.
+#  
+#  The names that refer to C++ variables must be kept:
+#  - mlppi_forces 
+#  - mlppi_input
+#  The names referring to python functions can be modified, 
+#  as long as they are the same in the lammps .in and in 
+#  the .py script called by the lammps python variables
+#
+####################################################################
+
+
+# Define the variables used at each simulation step
+variable 		mlppi_forces 	python 	compute_forces              # Variable that stores the results sent back by the python, defined below
+variable 		mlppi_input 	string 	"null"                      # Variable that sends to the python model the information required 
+
+
+# Define the variables used for initialization 
+variable 		mlppi_initialize 	python 	initialize_model
+variable 		mlppi_model_name 	string 	"python_model"    		# Name of the ML python model. The python function will handle loading from file and initialization.
+
+
+# Define the python functions and add maximum length <--- BEWARE: Do not exceed this in python
+# The "compute_forces" and "initialize_model" functions are found in file "mlppi_spk_interface.py"
+python 			compute_forces 		input 	1 	v_mlppi_input 		return v_mlppi_forces 		format ss length 1000000  file 	mlppi_spk_interface.py
+python 			initialize_model 	input 	1 	v_mlppi_model_name 	return v_mlppi_initialize 	format ss length 100 	  file 	mlppi_spk_interface.py
+
+
+# Simulation settings 
+units          	real
+atom_style     	full
+boundary       	p p p
+	
+pair_style     	mlppi 5   				# after keyword "mlppi" put the value for the cutoff, in angstroem
+read_data      	four_beads.data
+pair_coeff     	* *
+	
+timestep       	1
+fix            	1 all nvt temp 300 300 10.0
+velocity       	all create 300 1650557066 mom yes rot yes dist gaussian
+	
+dump           	1 all custom 1 four_beads.dump id mol type q x y z ix iy iz fx fy fz
+dump_modify    	1 sort id
+dump           	2 all custom 1 four_beads.veldump id vx vy vz
+dump_modify    	2 sort id
+	
+thermo_style   	custom step etotal ke pe ebond eangle edihed eimp evdwl ecoul elong temp press c_virial c_virial[1] c_virial[2] c_virial[3] c_virial[4] c_virial[5] c_virial[6]
+	
+thermo         	1
+thermo_modify  	flush yes
+	
+restart        	10 four_beads1.rst four_beads2.rst
+run            	100
+write_restart  	four_beads.rst
+
+

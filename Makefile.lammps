@@ -1,0 +1,7 @@
+# Settings that the LAMMPS build will import when this package library is used
+# See the README file for more explanation
+
+python_SYSINC = $(shell which /home/ericci/.conda/envs/schnetpack/bin/python3-config > /dev/null 2>&1 && /home/ericci/.conda/envs/schnetpack/bin/python3-config --includes || :)
+python_SYSLIB = $(shell which /home/ericci/.conda/envs/schnetpack/bin/python3-config > /dev/null 2>&1 && /home/ericci/.conda/envs/schnetpack/bin/python3-config --ldflags --embed > /dev/null 2>&1 && /home/ericci/.conda/envs/schnetpack/bin/python3-config --ldflags --embed || (which /home/ericci/.conda/envs/schnetpack/bin/python3-config > /dev/null 2>&1 && /home/ericci/.conda/envs/schnetpack/bin/python3-config --ldflags || :) )
+python_SYSPATH =
+PYTHON=/home/ericci/.conda/envs/schnetpack/bin/python
